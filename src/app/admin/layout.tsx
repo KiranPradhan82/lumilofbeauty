@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import {
   LayoutDashboard, Scissors, FolderOpen, CalendarDays, Settings,
-  LogOut, Menu, X, Sparkles, ChevronRight
+  LogOut, Menu, X, Sparkles, ChevronRight, UserCircle
 } from 'lucide-react'
 
 const navItems = [
@@ -15,6 +15,7 @@ const navItems = [
   { label: 'Categories', href: '/admin/categories', icon: FolderOpen },
   { label: 'Bookings', href: '/admin/bookings', icon: CalendarDays },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
+  { label: 'Profile', href: '/admin/profile', icon: UserCircle },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
