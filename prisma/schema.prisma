@@ -54,6 +54,7 @@ model Service {
   category    ServiceCategory  @relation(fields: [categoryId], references: [id])
   bookings    BookingService[]
   reviews     Review[]
+  banners     Banner[]
 }
 
 model Booking {
@@ -65,6 +66,9 @@ model Booking {
   totalAmount   Float
   paymentMethod String?  // esewa, khalti, bank_transfer
   paymentStatus String   @default("pending") // pending, paid, failed, refunded
+  address       String?
+  latitude      Float?
+  longitude     Float?
   notes         String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -102,6 +106,22 @@ model SiteSetting {
   key       String   @unique
   value     String
   updatedAt DateTime @updatedAt
+}
+
+model Banner {
+  id          String   @id @default(cuid())
+  title       String
+  subtitle    String?
+  imageUrl    String?
+  videoUrl    String?
+  serviceId   String?
+  linkUrl     String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  service Service? @relation(fields: [serviceId], references: [id])
 }
 
 model Otp {
