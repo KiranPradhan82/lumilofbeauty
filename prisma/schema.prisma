@@ -30,6 +30,7 @@ model ServiceCategory {
   icon      String?
   image     String?
   sortOrder Int       @default(0)
+  isActive  Boolean   @default(true)
   createdAt DateTime  @default(now())
 
   services Service[]
@@ -94,4 +95,11 @@ model Review {
 
   user    User    @relation(fields: [userId], references: [id])
   service Service @relation(fields: [serviceId], references: [id])
+}
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
 }
