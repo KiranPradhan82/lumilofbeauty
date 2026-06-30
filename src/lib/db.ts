@@ -29,8 +29,14 @@ function createPrismaClient(): PrismaClient {
     return new PrismaClient({ adapter, log: ['query'] })
   }
 
-  // Standard local SQLite
-  return new PrismaClient({ log: ['query'] })
+  // Standard local SQLite — explicitly pass the URL so Prisma doesn't
+  // read the raw (possibly "undefined") env var itself
+  return new PrismaClient({
+    log: ['query'],
+    datasources: {
+      db: { url: databaseUrl },
+    },
+  })
 }
 
 export const db = globalForPrisma.prisma ?? createPrismaClient()
