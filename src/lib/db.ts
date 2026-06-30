@@ -6,11 +6,21 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-const databaseUrl = process.env.DATABASE_URL ?? 'file:./db/custom.db'
+const rawUrl = process.env.DATABASE_URL
+const databaseUrl = (rawUrl && rawUrl !== 'undefined' && rawUrl.trim() !== '')
+  ? rawUrl.trim()
+  : 'file:./db/custom.db'
 
 function createPrismaClient(): PrismaClient {
   // If using Turso (libsql://), use the libsql adapter
   if (databaseUrl.startsWith('libsql://')) {
+    if (!process.env.DATABASE_AUTH_TOKEN) {
+      throw new Error(
+        'DATABASE_AUTH_TOKEN is required when using Turso (libsql://). ' +
+        'Set it in your deployment environment variables. ' +
+        'Get it from your Turso dashboard → your database → Authentication.'
+      )
+    }
     const libsql = createClient({
       url: databaseUrl,
       authToken: process.env.DATABASE_AUTH_TOKEN,
