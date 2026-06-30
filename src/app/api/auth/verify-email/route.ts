@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { Resend } from 'resend'
+import { sendEmail } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,17 +17,6 @@ export async function POST(request: NextRequest) {
 
     if (user.emailVerified) {
       return NextResponse.json({ success: true, message: 'Email is already verified' })
-    }
-
-    // Get Resend API key from settings
-    const resendKeySetting = await db.siteSetting.findUnique({ where: { key: 'resendApiKey' } })
-    const resendApiKey = resendKeySetting?.value || process.env.RESEND_API_KEY
-
-    if (!resendApiKey) {
-      return NextResponse.json({
-        success: false,
-        error: 'Email service is not configured. Admin needs to set the Resend API key in settings.',
-      }, { status: 503 })
     }
 
     // Generate 6-digit OTP
@@ -48,19 +37,12 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Get company info for email
-    const settings = await db.siteSetting.findMany({
-      where: { key: { in: ['companyName', 'companyEmail'] } },
-    })
-    const settingsMap: Record<string, string> = {}
-    for (const s of settings) settingsMap[s.key] = s.value
-    const companyName = settingsMap.companyName || 'Lumil of Beauty'
-    const fromEmail = settingsMap.companyEmail || 'onboarding@resend.dev'
+    // Get company name for email
+    const companyNameSetting = await db.siteSetting.findUnique({ where: { key: 'companyName' } })
+    const companyName = companyNameSetting?.value || 'Lumil of Beauty'
 
-    // Send verification email via Resend
-    const resend = new Resend(resendApiKey)
-    await resend.emails.send({
-      from: `${companyName} <${fromEmail}>`,
+    // Send verification email via Gmail
+    await sendEmail({
       to: email,
       subject: `Verify your email — ${companyName}`,
       html: `

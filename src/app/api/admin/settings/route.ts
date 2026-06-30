@@ -10,7 +10,7 @@ const DEFAULTS: Record<string, string> = {
 }
 
 // Keys that contain secrets and should be masked in GET responses to non-admin contexts
-const SECRET_KEYS = ['resendApiKey', 'googleClientSecret']
+const SECRET_KEYS = ['gmailAppPassword', 'googleClientSecret', 'resendApiKey']
 
 export async function GET() {
   try {
