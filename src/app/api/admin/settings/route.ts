@@ -5,7 +5,7 @@ const DEFAULTS: Record<string, string> = {
   companyName: 'Lumil of Beauty',
   companyEmail: 'hello@lumilofbeauty.com',
   companyPhone: '+977-9801234567',
-  companyAddress: 'Jhamsikhel, Lalitpur, Kathmandu, Nepal',
+  companyAddress: 'Ilam & Jhapa Districts, Eastern Nepal',
   logoUrl: '',
 }
 

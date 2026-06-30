@@ -27,13 +27,25 @@ export default function AdminSettingsPage() {
     })
   }, [])
 
+  const [error, setError] = useState('')
+
   const handleSave = async () => {
-    setSaving(true); setSaved(false)
-    const res = await fetch('/api/admin/settings', {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    })
-    if (res.ok) setSaved(true)
+    setSaving(true); setSaved(false); setError('')
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      const json = await res.json()
+      if (json.success) {
+        setSaved(true)
+        setTimeout(() => setSaved(false), 3000)
+      } else {
+        setError(json.error || 'Failed to save settings')
+      }
+    } catch (e: any) {
+      setError(e.message || 'Network error — please try again')
+    }
     setSaving(false)
   }
 
@@ -69,7 +81,7 @@ export default function AdminSettingsPage() {
           ))}
           <div>
             <Label className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-gray-400" />Address</Label>
-            <textarea placeholder="Jhamsikhel, Lalitpur, Kathmandu, Nepal" value={addressVal} onChange={addressHandler} className="mt-1.5 flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring" rows={3} />
+            <textarea placeholder="Ilam & Jhapa Districts, Eastern Nepal" value={addressVal} onChange={addressHandler} className="mt-1.5 flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring" rows={3} />
           </div>
         </CardContent>
       </Card>
@@ -104,6 +116,7 @@ export default function AdminSettingsPage() {
         </CardContent>
       </Card>
 
+      {error && <p className="text-red-500 text-sm bg-red-50 rounded-xl p-3 border border-red-100">{error}</p>}
       <Button onClick={handleSave} disabled={saving} className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white">
         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
         {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Settings'}
