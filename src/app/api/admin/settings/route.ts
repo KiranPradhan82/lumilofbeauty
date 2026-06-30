@@ -25,8 +25,9 @@ export async function GET() {
       }
     }
     return NextResponse.json({ success: true, data: map })
-  } catch (error) {
-    return NextResponse.json({ success: false, error: 'Failed to fetch settings' }, { status: 500 })
+  } catch (error: any) {
+    console.error('Settings GET error:', error)
+    return NextResponse.json({ success: false, error: 'Failed to fetch settings: ' + (error.message || 'Unknown error') }, { status: 500 })
   }
 }
 
