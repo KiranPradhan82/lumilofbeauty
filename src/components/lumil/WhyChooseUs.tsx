@@ -1,38 +1,38 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Award, Shield, HeartHandshake, Clock, Sparkles, Users } from 'lucide-react'
+import { Award, Shield, HeartHandshake, Clock, Sparkles, Users, MapPin, Home, Truck } from 'lucide-react'
 
 const features = [
   {
+    icon: <Home className="w-7 h-7" />,
+    title: 'Beauty at Your Doorstep',
+    description: 'No need to travel to a salon — our skilled beauty artists come directly to your home in Ilam and Jhapa. Relax in your own space while we transform your look with professional care and expertise.',
+  },
+  {
     icon: <Award className="w-7 h-7" />,
-    title: 'Expert Artists',
-    description: 'Our team of certified beauty professionals brings years of experience and a genuine passion for helping you look your best. Every artist undergoes rigorous training.',
+    title: 'Certified Home Artists',
+    description: 'Every artist on our platform is vetted, trained, and certified. They bring their own professional kit and products, ensuring a salon-quality experience delivered right to your living room or venue.',
   },
   {
     icon: <Shield className="w-7 h-7" />,
     title: 'Premium Products',
-    description: 'We use only internationally acclaimed, cruelty-free beauty products from trusted brands. Your skin deserves nothing less than the finest ingredients available.',
+    description: 'We use only internationally acclaimed, cruelty-free beauty products from trusted brands. Our artists carry the finest cosmetics and skincare products to ensure safe, beautiful results every time.',
   },
   {
     icon: <HeartHandshake className="w-7 h-7" />,
-    title: 'Personalized Care',
-    description: 'Every service begins with a personal consultation to understand your unique needs, skin type, and preferences for a truly tailored beauty experience.',
+    title: 'Personalized Consultation',
+    description: 'Every service starts with a one-on-one consultation at your home. Our artists assess your skin type, preferences, and the occasion to deliver a truly customized beauty experience tailored to you.',
   },
   {
-    icon: <Clock className="w-7 h-7" />,
-    title: 'Flexible Scheduling',
-    description: 'Book appointments at your convenience with our easy online system. We offer flexible time slots including weekends and early morning appointments.',
-  },
-  {
-    icon: <Sparkles className="w-7 h-7" />,
-    title: 'Trendsetting Styles',
-    description: 'Stay ahead of the curve with our artists who are constantly trained on the latest global beauty trends, techniques, and innovative treatments.',
+    icon: <MapPin className="w-7 h-7" />,
+    title: 'Serving Ilam & Jhapa',
+    description: 'We proudly serve communities across Eastern Nepal. Whether you are in Ilam Bazaar, Chandragadhi, Bhadrapur, Damak, or surrounding areas, our artists are ready to come to you.',
   },
   {
     icon: <Users className="w-7 h-7" />,
-    title: '5000+ Happy Clients',
-    description: 'Join our growing family of satisfied clients who trust us for their most important beauty moments, from everyday looks to once-in-a-lifetime celebrations.',
+    title: '5,000+ Happy Homes',
+    description: 'Join thousands of satisfied customers across Eastern Nepal who trust Lumil of Beauty for weddings, events, and everyday pampering — all without leaving their homes.',
   },
 ]
 
@@ -50,15 +50,15 @@ export function WhyChooseUs() {
             Why Choose Us
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-            Beauty,{' '}
+            Home Beauty,{' '}
             <span className="bg-gradient-to-r from-pink-600 to-rose-500 bg-clip-text text-transparent">
               Elevated
             </span>
           </h2>
           <p className="text-gray-500 max-w-2xl mx-auto text-lg">
-            At Lumil of Beauty, we believe everyone deserves to feel beautiful.
-            Here is what sets us apart from the rest and keeps our clients
-            coming back time after time.
+            Why travel to a salon when beauty can come to you? Lumil of Beauty brings
+            professional artistry and premium products to your doorstep across
+            Ilam and Jhapa.
           </p>
         </motion.div>
 

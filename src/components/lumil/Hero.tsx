@@ -2,14 +2,14 @@
 
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import { ArrowDown, Sparkles, Star } from 'lucide-react'
+import { ArrowDown, Sparkles, Star, MapPin, Home } from 'lucide-react'
 
 export function Hero() {
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-rose-400 via-pink-500 to-fuchsia-600" />
-      
+
       {/* Decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
@@ -67,7 +67,7 @@ export function Hero() {
         >
           <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm rounded-full px-4 py-2 mb-8">
             <Star className="w-4 h-4 text-yellow-300 fill-yellow-300" />
-            <span className="text-white/90 text-sm font-medium">Premium Beauty Services in Nepal</span>
+            <span className="text-white/90 text-sm font-medium">Home Beauty Services in Eastern Nepal</span>
           </div>
         </motion.div>
 
@@ -77,9 +77,9 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6"
         >
-          Discover Your{' '}
+          Beauty Comes{' '}
           <span className="relative">
-            <span className="relative z-10">Radiant Beauty</span>
+            <span className="relative z-10">To You</span>
             <motion.span
               initial={{ width: 0 }}
               animate={{ width: '100%' }}
@@ -95,8 +95,9 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="text-lg sm:text-xl text-white/80 max-w-2xl mx-auto mb-10 leading-relaxed"
         >
-          From stunning bridal looks to relaxing spa treatments, our expert artists
-          create beauty experiences that make you feel extraordinary.
+          Professional beauty artists travel to your doorstep in Ilam and Jhapa.
+          From bridal makeup to spa treatments, experience salon-quality beauty
+          in the comfort of your home.
         </motion.p>
 
         <motion.div
@@ -114,12 +115,13 @@ export function Hero() {
             Explore Services
           </Button>
           <Button
-            onClick={() => document.querySelector('#services')?.scrollIntoView({ behavior: 'smooth' })}
+            onClick={() => document.querySelector('#booking')?.scrollIntoView({ behavior: 'smooth' })}
             size="lg"
             variant="outline"
             className="border-white/30 text-white hover:bg-white/10 rounded-full px-8 h-14 text-base font-medium backdrop-blur-sm"
           >
-            Book Appointment
+            <MapPin className="w-5 h-5 mr-2" />
+            Book at Your Location
           </Button>
         </motion.div>
 

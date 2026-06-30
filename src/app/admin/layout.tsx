@@ -6,13 +6,14 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import {
   LayoutDashboard, Scissors, FolderOpen, CalendarDays, Settings,
-  LogOut, Menu, X, Sparkles, ChevronRight, UserCircle
+  LogOut, Menu, X, Sparkles, ChevronRight, UserCircle, Image
 } from 'lucide-react'
 
 const navItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { label: 'Services', href: '/admin/services', icon: Scissors },
   { label: 'Categories', href: '/admin/categories', icon: FolderOpen },
+  { label: 'Banners', href: '/admin/banners', icon: Image },
   { label: 'Bookings', href: '/admin/bookings', icon: CalendarDays },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
   { label: 'Profile', href: '/admin/profile', icon: UserCircle },

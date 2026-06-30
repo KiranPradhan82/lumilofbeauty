@@ -33,8 +33,8 @@ export function Footer() {
       <div className="bg-gradient-to-r from-pink-600 to-rose-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <h3 className="text-xl sm:text-2xl font-bold text-white">Ready to Glow?</h3>
-            <p className="text-pink-100 text-sm mt-1">Book your appointment today and experience the Lumil difference.</p>
+            <h3 className="text-xl sm:text-2xl font-bold text-white">Ready to Glow at Home?</h3>
+            <p className="text-pink-100 text-sm mt-1">Book your home beauty service today and let our artists come to you across Ilam and Jhapa.</p>
           </div>
           <button
             onClick={() => handleNavClick('#services')}
@@ -60,8 +60,9 @@ export function Footer() {
               </div>
             </div>
             <p className="text-sm text-gray-400 leading-relaxed mb-6">
-              Your premier destination for professional beauty services in Nepal.
-              Where artistry meets elegance, and every visit is a transformative experience.
+              Eastern Nepal&apos;s premier home beauty service. Our expert artists travel to your
+              doorstep across Ilam and Jhapa, bringing professional beauty experiences
+              to the comfort of your home.
             </p>
             <div className="flex gap-3">
               <a href="#" className="w-10 h-10 rounded-full bg-gray-800 hover:bg-pink-600 flex items-center justify-center transition-colors" aria-label="Instagram">
@@ -113,7 +114,7 @@ export function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-pink-500 mt-0.5 shrink-0" />
-                <span className="text-sm text-gray-400">Jhamsikhel, Lalitpur, Kathmandu, Nepal</span>
+                <span className="text-sm text-gray-400">Ilam &amp; Jhapa Districts, Eastern Nepal</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-pink-500 shrink-0" />
@@ -142,7 +143,7 @@ export function Footer() {
             &copy; {new Date().getFullYear()} Lumil of Beauty. All rights reserved.
           </p>
           <p className="text-xs text-gray-600">
-            Crafted with love in Kathmandu
+            Serving beauty at your doorstep across Eastern Nepal
           </p>
         </div>
       </div>
