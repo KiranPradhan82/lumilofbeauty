@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Calendar, Clock, User, MessageSquare, Sparkles, CheckCircle2 } from 'lucide-react'
+import { Calendar, Clock, User, MessageSquare, Sparkles, CheckCircle2, MapPin, Navigation, Search, Loader2, XCircle, CheckCircle } from 'lucide-react'
 import { MapPicker } from '@/components/lumil/MapPicker'
 
 const timeSlots = [
@@ -13,6 +13,12 @@ const timeSlots = [
   '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM',
   '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM', '6:00 PM',
 ]
+
+interface CoverageResult {
+  covered: boolean
+  distance: number
+  radius: number
+}
 
 export function BookingSection() {
   const [step, setStep] = useState(1)
@@ -33,6 +39,14 @@ export function BookingSection() {
     longitude: null as number | null,
   })
   const [loading, setLoading] = useState(false)
+
+  // Service availability state
+  const [coverage, setCoverage] = useState<CoverageResult | null>(null)
+  const [checkingCoverage, setCheckingCoverage] = useState(false)
+  const [serviceAreaConfigured, setServiceAreaConfigured] = useState(true)
+  const [detectingLocation, setDetectingLocation] = useState(false)
+  const [manualAddress, setManualAddress] = useState('')
+  const [checkingManualAddress, setCheckingManualAddress] = useState(false)
 
   // Load services and check if user is logged in
   useEffect(() => {
@@ -58,12 +72,85 @@ export function BookingSection() {
     } catch {}
   }, [])
 
+  // Auto-detect location when entering Step 2
+  useEffect(() => {
+    if (step !== 2) return
+    if (formData.latitude && formData.longitude) {
+      // Already have coordinates, check coverage
+      checkCoverage(formData.latitude, formData.longitude)
+      return
+    }
+    // Auto-detect customer's location
+    if (!navigator.geolocation) return
+    setDetectingLocation(true)
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords
+        setFormData(prev => ({ ...prev, latitude: lat, longitude: lng }))
+        checkCoverage(lat, lng)
+        setDetectingLocation(false)
+      },
+      () => {
+        setDetectingLocation(false)
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
+  }, [step])
+
+  const checkCoverage = async (lat: number, lng: number) => {
+    setCheckingCoverage(true)
+    try {
+      const res = await fetch('/api/check-coverage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lat, lng }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        setCoverage(json.data)
+        setServiceAreaConfigured(true)
+      } else if (json.error && json.error.includes('not configured')) {
+        setServiceAreaConfigured(false)
+        setCoverage(null)
+      }
+    } catch {
+      // Network error - allow booking if coverage check fails
+      setServiceAreaConfigured(false)
+    }
+    setCheckingCoverage(false)
+  }
+
   const handleLocationChange = (lat: number, lng: number, addr: string) => {
     setFormData(prev => ({ ...prev, latitude: lat, longitude: lng, address: addr }))
+    setCoverage(null)
+    if (lat && lng) checkCoverage(lat, lng)
   }
 
   const handleAddressChange = (addr: string) => {
     setFormData(prev => ({ ...prev, address: addr }))
+  }
+
+  const handleManualAddressCheck = async () => {
+    if (!manualAddress.trim()) return
+    setCheckingManualAddress(true)
+    setError('')
+    try {
+      // First geocode the address
+      const geoRes = await fetch(`/api/geocode?q=${encodeURIComponent(manualAddress)}`)
+      const geoJson = await geoRes.json()
+      if (!geoJson.success) {
+        setError(geoJson.error || 'Address not found. Try a more specific address.')
+        setCheckingManualAddress(false)
+        return
+      }
+      const { lat, lng, displayName } = geoJson.data
+      setFormData(prev => ({ ...prev, latitude: lat, longitude: lng, address: displayName || manualAddress }))
+      // Then check coverage
+      await checkCoverage(lat, lng)
+    } catch {
+      setError('Could not look up this address. Please try again.')
+    }
+    setCheckingManualAddress(false)
   }
 
   const toggleService = (id: string) => {
@@ -75,6 +162,8 @@ export function BookingSection() {
   const selectedTotal = services
     .filter(s => selectedServices.includes(s.id))
     .reduce((sum, s) => sum + s.price, 0)
+
+  const canProceedFromLocation = !serviceAreaConfigured || (coverage?.covered === true)
 
   const handleSubmit = async () => {
     if (!formData.name || !formData.phone || !formData.date || !formData.time) return
@@ -143,6 +232,8 @@ export function BookingSection() {
                 setStep(1)
                 setSelectedServices([])
                 setError('')
+                setCoverage(null)
+                setManualAddress('')
                 setFormData({ name: customer ? `${customer.firstName} ${customer.lastName}`.trim() : '', phone: customer?.phone || '', email: customer?.email || '', date: '', time: '', notes: '', address: '', latitude: null, longitude: null })
               }}
               variant="outline"
@@ -191,7 +282,7 @@ export function BookingSection() {
             <div className="flex items-center justify-center gap-2 sm:gap-4 mb-10">
               {[
                 { num: 1, label: 'Details', icon: <User className="w-4 h-4" /> },
-                { num: 2, label: 'Location', icon: <Calendar className="w-4 h-4" /> },
+                { num: 2, label: 'Location', icon: <MapPin className="w-4 h-4" /> },
                 { num: 3, label: 'Schedule', icon: <Clock className="w-4 h-4" /> },
                 { num: 4, label: 'Confirm', icon: <CheckCircle2 className="w-4 h-4" /> },
               ].map((s, i) => (
@@ -316,13 +407,55 @@ export function BookingSection() {
               </motion.div>
             )}
 
-            {/* Step 2: Location */}
+            {/* Step 2: Location + Service Availability */}
             {step === 2 && (
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 className="space-y-6"
               >
+                {/* Auto-detection status */}
+                {detectingLocation && (
+                  <div className="flex items-center gap-2 text-sm text-pink-600 bg-pink-50 rounded-xl p-3 border border-pink-100">
+                    <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                    Detecting your current location...
+                  </div>
+                )}
+
+                {/* Manual address entry */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    <Search className="w-4 h-4 inline mr-1.5 text-pink-500" />
+                    Enter Your Address Manually
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="e.g. Ilam Bazaar, Ilam, Nepal"
+                      value={manualAddress}
+                      onChange={(e) => setManualAddress(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleManualAddressCheck() } }}
+                      className="flex-1 rounded-xl border-pink-100 focus:border-pink-400 h-12"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleManualAddressCheck}
+                      disabled={checkingManualAddress || !manualAddress.trim()}
+                      className="rounded-xl border-pink-200 text-pink-600 hover:bg-pink-50 h-12 px-4"
+                    >
+                      {checkingManualAddress ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Search className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-400">
+                    Type your address and click search to find your location on the map.
+                  </p>
+                </div>
+
+                {/* Map picker */}
                 <MapPicker
                   latitude={formData.latitude}
                   longitude={formData.longitude}
@@ -330,6 +463,49 @@ export function BookingSection() {
                   onLocationChange={handleLocationChange}
                   onAddressChange={handleAddressChange}
                 />
+
+                {/* Coverage check status */}
+                {checkingCoverage && (
+                  <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 rounded-xl p-3 border border-blue-100">
+                    <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                    Checking service availability at your location...
+                  </div>
+                )}
+
+                {!checkingCoverage && coverage && (
+                  coverage.covered ? (
+                    <div className="flex items-start gap-2 text-sm text-green-700 bg-green-50 rounded-xl p-3 border border-green-100">
+                      <CheckCircle className="w-5 h-5 mt-0.5 shrink-0" />
+                      <div>
+                        <strong>Service available!</strong> Your location is {coverage.distance} km away from our parlour (within {coverage.radius} km delivery radius).
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-start gap-2 text-sm text-red-600 bg-red-50 rounded-xl p-3 border border-red-100">
+                      <XCircle className="w-5 h-5 mt-0.5 shrink-0" />
+                      <div>
+                        <strong>Service not available at this location.</strong> Your location is {coverage.distance} km away from our parlour. Our delivery radius is {coverage.radius} km. Please select a different location within the service area.
+                      </div>
+                    </div>
+                  )
+                )}
+
+                {!checkingCoverage && !coverage && !detectingLocation && serviceAreaConfigured && formData.latitude && formData.longitude && (
+                  <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 rounded-xl p-3 border border-amber-100">
+                    <Navigation className="w-4 h-4 shrink-0" />
+                    Select or confirm your location on the map to check service availability.
+                  </div>
+                )}
+
+                {!serviceAreaConfigured && (
+                  <div className="flex items-start gap-2 text-sm text-gray-500 bg-gray-50 rounded-xl p-3 border border-gray-100">
+                    <Navigation className="w-4 h-4 mt-0.5 shrink-0" />
+                    <div>
+                      Service area check is not configured yet. You can proceed with your booking. Please select a location within Ilam & Jhapa districts.
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex gap-3">
                   <Button
                     variant="outline"
@@ -339,8 +515,10 @@ export function BookingSection() {
                     Back
                   </Button>
                   <Button
-                    onClick={() => setStep(3)}
-                    className="flex-1 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white rounded-xl h-12 font-semibold"
+                    onClick={() => { setError(''); setStep(3) }}
+                    disabled={!canProceedFromLocation}
+                    className="flex-1 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white rounded-xl h-12 font-semibold disabled:opacity-50"
+                    title={!canProceedFromLocation ? 'Please select a location within our service area' : undefined}
                   >
                     Continue to Schedule
                   </Button>
@@ -439,6 +617,12 @@ export function BookingSection() {
                       <div className="flex justify-between">
                         <span className="text-gray-500">Location</span>
                         <span className="font-medium text-gray-900 text-right max-w-[60%] text-xs">{formData.address}</span>
+                      </div>
+                    )}
+                    {coverage && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Distance</span>
+                        <span className="font-medium text-green-600">{coverage.distance} km from parlour</span>
                       </div>
                     )}
                     {selectedServices.length > 0 && (

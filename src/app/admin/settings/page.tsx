@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Save, Loader2, Upload, ImageIcon, Mail, Phone, MapPin, Building2, Key, Shield, Eye, EyeOff, AlertCircle } from 'lucide-react'
+import { Save, Loader2, Upload, ImageIcon, Mail, Phone, MapPin, Building2, Key, Shield, Eye, EyeOff, AlertCircle, Navigation, Ruler, Crosshair, CheckCircle2, XCircle } from 'lucide-react'
 
 const FIELDS = [
   { key: 'companyName', label: 'Company Name', icon: Building2, type: 'text', placeholder: 'Lumil of Beauty' },
@@ -22,6 +22,9 @@ export default function AdminSettingsPage() {
   const [error, setError] = useState('')
   const [uploading, setUploading] = useState(false)
   const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({})
+  const [geocoding, setGeocoding] = useState(false)
+  const [geoError, setGeoError] = useState('')
+  const [geoSuccess, setGeoSuccess] = useState('')
 
   useEffect(() => {
     fetch('/api/admin/settings').then(r => r.json()).then(res => {
@@ -65,6 +68,31 @@ export default function AdminSettingsPage() {
       setError(e.message || 'Network error')
     }
     setTestingEmail(false)
+  }
+
+  const handleGeocode = async () => {
+    const addr = form.parlourAddress?.trim()
+    if (!addr) { setGeoError('Enter a parlour address first'); return }
+    setGeocoding(true); setGeoError(''); setGeoSuccess('')
+    try {
+      const res = await fetch(`/api/geocode?q=${encodeURIComponent(addr)}`)
+      const json = await res.json()
+      if (json.success) {
+        const { lat, lng, displayName } = json.data
+        setForm(f => ({
+          ...f,
+          parlourAddress: displayName || addr,
+          parlourLat: lat.toFixed(6),
+          parlourLng: lng.toFixed(6),
+        }))
+        setGeoSuccess(`Found: ${lat.toFixed(6)}, ${lng.toFixed(6)}`)
+      } else {
+        setGeoError(json.error || 'Address not found. Try a more specific address.')
+      }
+    } catch {
+      setGeoError('Geocoding failed. Check your internet and try again.')
+    }
+    setGeocoding(false)
   }
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -159,6 +187,111 @@ export default function AdminSettingsPage() {
               {form.logoUrl && <Button variant="ghost" size="sm" className="text-red-500" onClick={() => setForm(f => ({ ...f, logoUrl: '' }))}>Remove</Button>}
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Service Area & Delivery Radius */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Navigation className="w-5 h-5 text-pink-500" />
+            Service Area & Delivery Radius
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-gray-500">
+            Set your parlour location and the maximum distance (in km) you are willing to travel. Customers will only be able to book if their location falls within this radius.
+          </p>
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-1.5">
+              <MapPin className="w-4 h-4 text-gray-400" />
+              Parlour Address
+            </Label>
+            <textarea
+              placeholder="e.g. Ilam Bazaar, Ilam Municipality, Province 1, Nepal"
+              value={form.parlourAddress || ''}
+              onChange={e => { setForm({ ...form, parlourAddress: e.target.value }); setGeoError(''); setGeoSuccess('') }}
+              className="mt-1.5 flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              rows={2}
+            />
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleGeocode}
+            disabled={geocoding || !form.parlourAddress?.trim()}
+            className="rounded-xl border-pink-200 text-pink-600 hover:bg-pink-50"
+          >
+            {geocoding ? (
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Detecting Coordinates...</>
+            ) : (
+              <><Crosshair className="w-4 h-4 mr-2" /> Auto-detect Latitude & Longitude</>
+            )}
+          </Button>
+          {geoError && (
+            <div className="flex items-start gap-2 text-sm text-red-600 bg-red-50 rounded-xl p-3 border border-red-100">
+              <XCircle className="w-4 h-4 mt-0.5 shrink-0" />
+              {geoError}
+            </div>
+          )}
+          {geoSuccess && (
+            <div className="flex items-start gap-2 text-sm text-green-600 bg-green-50 rounded-xl p-3 border border-green-100">
+              <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" />
+              {geoSuccess}
+            </div>
+          )}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs text-gray-500">Latitude</Label>
+              <Input
+                type="text"
+                placeholder="26.900000"
+                value={form.parlourLat || ''}
+                onChange={e => setForm({ ...form, parlourLat: e.target.value })}
+                className="mt-1 rounded-xl font-mono text-sm"
+                readOnly
+              />
+              <p className="text-xs text-gray-400 mt-1">Auto-filled by geocoding</p>
+            </div>
+            <div>
+              <Label className="text-xs text-gray-500">Longitude</Label>
+              <Input
+                type="text"
+                placeholder="87.900000"
+                value={form.parlourLng || ''}
+                onChange={e => setForm({ ...form, parlourLng: e.target.value })}
+                className="mt-1 rounded-xl font-mono text-sm"
+                readOnly
+              />
+              <p className="text-xs text-gray-400 mt-1">Auto-filled by geocoding</p>
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-1.5">
+              <Ruler className="w-4 h-4 text-gray-400" />
+              Delivery Radius (km)
+            </Label>
+            <Input
+              type="number"
+              min="1"
+              max="200"
+              placeholder="25"
+              value={form.deliveryRadiusKm || ''}
+              onChange={e => setForm({ ...form, deliveryRadiusKm: e.target.value })}
+              className="rounded-xl"
+            />
+            <p className="text-xs text-gray-400">
+              Maximum distance from parlour that artists will travel. Default is 25 km if not set.
+            </p>
+          </div>
+          {form.parlourLat && form.parlourLng && form.deliveryRadiusKm && (
+            <div className="bg-pink-50 rounded-xl p-3 border border-pink-100">
+              <p className="text-xs text-pink-700">
+                <strong>Service area configured:</strong> Centre at {form.parlourLat}, {form.parlourLng} with {form.deliveryRadiusKm} km radius.
+                Customers outside this range will not be able to book.
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 

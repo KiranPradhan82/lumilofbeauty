@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { MapPin, Navigation, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-            import { Input } from '@/components/ui/input'
+import { Input } from '@/components/ui/input'
 
 // Eastern Nepal bounds (Ilam & Jhapa)
 const DEFAULT_CENTER: [number, number] = [26.8, 87.9]
@@ -26,6 +26,33 @@ export function MapPicker({ latitude, longitude, address, onLocationChange, onAd
   const [manualLat, setManualLat] = useState('')
   const [manualLng, setManualLng] = useState('')
   const [mapLoaded, setMapLoaded] = useState(false)
+  const lastExternalCoords = useRef<string>('')
+
+  // Update map when parent sets coordinates (e.g. from manual address search or auto-detect)
+  useEffect(() => {
+    if (!latitude || !longitude || !mapInstanceRef.current) return
+    const key = `${latitude.toFixed(6)},${longitude.toFixed(6)}`
+    if (key === lastExternalCoords.current) return
+    lastExternalCoords.current = key
+    mapInstanceRef.current.setView([latitude, longitude], 15)
+    ;(async () => {
+      const L = (await import('leaflet')).default
+      const icon = L.icon({
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
+      })
+      if (markerRef.current) {
+        markerRef.current.setLatLng([latitude, longitude])
+      } else {
+        markerRef.current = L.marker([latitude, longitude], { icon }).addTo(mapInstanceRef.current)
+      }
+    })()
+  }, [latitude, longitude])
 
   useEffect(() => {
     setMapLoaded(false)
@@ -65,6 +92,7 @@ export function MapPicker({ latitude, longitude, address, onLocationChange, onAd
         const m = L.marker([latitude, longitude], { icon }).addTo(map)
         markerRef.current = m
         map.setView([latitude, longitude], 14)
+        lastExternalCoords.current = `${latitude.toFixed(6)},${longitude.toFixed(6)}`
       }
 
       map.on('click', (e: any) => {
@@ -140,6 +168,7 @@ export function MapPicker({ latitude, longitude, address, onLocationChange, onAd
       mapInstanceRef.current.removeLayer(markerRef.current)
       markerRef.current = null
     }
+    lastExternalCoords.current = ''
     onLocationChange(0, 0, '')
     onAddressChange('')
   }

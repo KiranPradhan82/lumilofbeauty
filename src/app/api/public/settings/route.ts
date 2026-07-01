@@ -1,11 +1,17 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
-// Returns only non-sensitive public settings (Google Client ID is needed for login)
+// Returns non-sensitive public settings needed by the frontend
 export async function GET() {
   try {
     const settings = await db.siteSetting.findMany({
-      where: { key: { in: ['googleClientId', 'companyName'] } },
+      where: { key: { in: [
+        'googleClientId',
+        'companyName',
+        'parlourLat',
+        'parlourLng',
+        'deliveryRadiusKm',
+      ] } },
     })
     const data: Record<string, string> = {}
     for (const s of settings) data[s.key] = s.value
