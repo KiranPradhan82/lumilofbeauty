@@ -24,19 +24,37 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [adminUser, setAdminUser] = useState<any>(null)
 
   useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
-    if (pathname === '/admin/login') return
-    const auth = localStorage.getItem('lumil_admin_auth')
-    if (!auth) router.replace('/admin/login')
+    if (pathname === '/admin/login') {
+      router.replace('/login')
+      return
+    }
+    try {
+      const stored = localStorage.getItem('lumil_customer')
+      if (stored) {
+        const user = JSON.parse(stored)
+        if (user.role === 'admin') {
+          setAdminUser(user)
+          return
+        }
+      }
+    } catch {}
+    // Not an admin — redirect to login
+    router.replace('/login')
   }, [pathname, router])
 
-  if (!mounted) return null
-  if (pathname === '/admin/login') return <>{children}</>
+  if (!mounted || !adminUser) return null
 
   const isActive = (href: string) => pathname === href
+
+  const handleLogout = () => {
+    localStorage.removeItem('lumil_customer')
+    router.replace('/login')
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -69,6 +87,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </Button>
           </div>
 
+          {/* Admin user info */}
+          <div className="px-5 py-3 border-b border-gray-800">
+            <p className="text-sm font-medium text-gray-200 truncate">{adminUser.firstName} {adminUser.lastName}</p>
+            <p className="text-xs text-gray-500 truncate">{adminUser.email}</p>
+          </div>
+
           <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
             {navItems.map((item) => {
               const active = isActive(item.href)
@@ -90,12 +114,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             })}
           </nav>
 
-          <div className="px-3 py-4 border-t border-gray-800">
+          <div className="px-3 py-4 border-t border-gray-800 space-y-2">
             <button
-              onClick={() => {
-                localStorage.removeItem('lumil_admin_auth')
-                router.replace('/admin/login')
-              }}
+              onClick={() => router.push('/')}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-all"
+            >
+              <Sparkles className="w-5 h-5" />
+              View Website
+            </button>
+            <button
+              onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-red-400 hover:bg-gray-800 transition-all"
             >
               <LogOut className="w-5 h-5" />

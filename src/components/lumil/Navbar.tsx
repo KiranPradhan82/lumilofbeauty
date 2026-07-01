@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Menu, X, Sparkles, LogIn, UserCircle, ShieldCheck } from 'lucide-react'
+import { Menu, X, Sparkles, LogIn, UserCircle } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const navLinks = [
@@ -185,13 +185,6 @@ export function Navbar() {
                     >
                       Book Now
                     </Button>
-                    <button
-                      onClick={() => { setMobileOpen(false); router.push('/admin/login') }}
-                      className="w-full text-center text-xs text-gray-400 hover:text-gray-500 py-1 flex items-center justify-center gap-1"
-                    >
-                      <ShieldCheck className="w-3 h-3" />
-                      Admin
-                    </button>
                   </div>
                 </div>
               </SheetContent>

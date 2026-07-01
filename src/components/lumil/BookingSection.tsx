@@ -17,11 +17,14 @@ const timeSlots = [
 export function BookingSection() {
   const [step, setStep] = useState(1)
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState('')
   const [services, setServices] = useState<{ id: string; name: string; price: number; category?: { name: string } }[]>([])
   const [selectedServices, setSelectedServices] = useState<string[]>([])
+  const [customer, setCustomer] = useState<any>(null)
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
+    email: '',
     date: '',
     time: '',
     notes: '',
@@ -31,11 +34,28 @@ export function BookingSection() {
   })
   const [loading, setLoading] = useState(false)
 
+  // Load services and check if user is logged in
   useEffect(() => {
     fetch('/api/services')
       .then(r => r.json())
       .then(json => { if (json.success) setServices(json.data || []) })
       .catch(() => {})
+
+    try {
+      const stored = localStorage.getItem('lumil_customer')
+      if (stored) {
+        const user = JSON.parse(stored)
+        if (user.role === 'customer' || user.role === 'admin') {
+          setCustomer(user)
+          setFormData(prev => ({
+            ...prev,
+            name: `${user.firstName} ${user.lastName}`.trim(),
+            phone: user.phone || '',
+            email: user.email || '',
+          }))
+        }
+      }
+    } catch {}
   }, [])
 
   const handleLocationChange = (lat: number, lng: number, addr: string) => {
@@ -59,10 +79,44 @@ export function BookingSection() {
   const handleSubmit = async () => {
     if (!formData.name || !formData.phone || !formData.date || !formData.time) return
     setLoading(true)
-    // Simulate booking submission
-    await new Promise(r => setTimeout(r, 1500))
+    setError('')
+
+    try {
+      const payload: Record<string, any> = {
+        bookingDate: formData.date,
+        bookingTime: formData.time,
+        serviceIds: selectedServices,
+        notes: formData.notes,
+        address: formData.address,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+      }
+
+      if (customer) {
+        payload.userId = customer.id
+      } else {
+        // Guest booking
+        payload.guestName = formData.name
+        payload.guestPhone = formData.phone
+        payload.guestEmail = formData.email
+      }
+
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const json = await res.json()
+
+      if (json.success) {
+        setSubmitted(true)
+      } else {
+        setError(json.error || 'Failed to submit booking')
+      }
+    } catch {
+      setError('Network error. Please try again.')
+    }
     setLoading(false)
-    setSubmitted(true)
   }
 
   if (submitted) {
@@ -88,7 +142,8 @@ export function BookingSection() {
                 setSubmitted(false)
                 setStep(1)
                 setSelectedServices([])
-                setFormData({ name: '', phone: '', date: '', time: '', notes: '', address: '', latitude: null, longitude: null })
+                setError('')
+                setFormData({ name: customer ? `${customer.firstName} ${customer.lastName}`.trim() : '', phone: customer?.phone || '', email: customer?.email || '', date: '', time: '', notes: '', address: '', latitude: null, longitude: null })
               }}
               variant="outline"
               className="rounded-full border-pink-200 text-pink-600 hover:bg-pink-50"
@@ -121,7 +176,7 @@ export function BookingSection() {
           </h2>
           <p className="text-gray-500 max-w-2xl mx-auto text-lg">
             Pick your location on the map, choose services, and our artist will
-            arrive at your home in Ilam or Jhapa. It&apos;s that easy!
+            arrive at your home in Ilam or Jhapa. No account needed!
           </p>
         </motion.div>
 
@@ -169,25 +224,47 @@ export function BookingSection() {
                 animate={{ opacity: 1, x: 0 }}
                 className="space-y-6"
               >
+                {/* Show logged-in status or guest fields */}
+                {customer && (
+                  <div className="bg-pink-50 rounded-xl p-3 flex items-center gap-2 text-sm text-pink-700">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    Signed in as <strong>{customer.firstName} {customer.lastName}</strong>
+                  </div>
+                )}
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
                   <Input
                     placeholder="Enter your full name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="rounded-xl border-pink-100 focus:border-pink-400 h-12"
+                    disabled={!!customer}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
                   <Input
                     placeholder="+977-9800000000"
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     className="rounded-xl border-pink-100 focus:border-pink-400 h-12"
+                    disabled={!!customer}
                   />
                 </div>
+                {!customer && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Email (optional — for booking updates)</label>
+                    <Input
+                      placeholder="you@example.com"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="rounded-xl border-pink-100 focus:border-pink-400 h-12"
+                    />
+                  </div>
+                )}
                 {services.length > 0 && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -226,8 +303,11 @@ export function BookingSection() {
                     className="rounded-xl border-pink-100 focus:border-pink-400 min-h-[100px] resize-none"
                   />
                 </div>
+
+                {error && <p className="text-red-500 text-sm text-center bg-red-50 rounded-xl px-3 py-2">{error}</p>}
+
                 <Button
-                  onClick={() => setStep(2)}
+                  onClick={() => { setError(''); setStep(2) }}
                   disabled={!formData.name || !formData.phone}
                   className="w-full bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white rounded-xl h-12 font-semibold disabled:opacity-50"
                 >
@@ -349,6 +429,12 @@ export function BookingSection() {
                       <span className="text-gray-500">Phone</span>
                       <span className="font-medium text-gray-900">{formData.phone}</span>
                     </div>
+                    {formData.email && !customer && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Email</span>
+                        <span className="font-medium text-gray-900">{formData.email}</span>
+                      </div>
+                    )}
                     {formData.address && (
                       <div className="flex justify-between">
                         <span className="text-gray-500">Location</span>
@@ -379,10 +465,21 @@ export function BookingSection() {
                     )}
                   </div>
                 </div>
+                {!customer && (
+                  <div className="bg-blue-50 rounded-xl p-3 border border-blue-100">
+                    <p className="text-xs text-blue-700">
+                      <strong>No account?</strong> No problem! Your booking will be submitted as a guest.
+                      {formData.email && ' You\'ll receive updates at your email.'}
+                    </p>
+                  </div>
+                )}
                 <p className="text-xs text-gray-400 text-center">
                   Our artist will arrive at your selected location. You can also
                   mention additional services during the visit.
                 </p>
+
+                {error && <p className="text-red-500 text-sm text-center bg-red-50 rounded-xl px-3 py-2">{error}</p>}
+
                 <div className="flex gap-3">
                   <Button
                     variant="outline"

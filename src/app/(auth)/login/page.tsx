@@ -8,9 +8,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Sparkles, LogIn, Mail, ArrowLeft, ShieldCheck, Send, Loader2 } from 'lucide-react'
 
-type Screen = 'login' | 'verify-email' | 'resend-later'
+type Screen = 'login' | 'verify-email'
 
-export default function CustomerLoginPage() {
+export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -85,6 +85,7 @@ export default function CustomerLoginPage() {
             const json = await res.json()
             if (json.success) {
               localStorage.setItem('lumil_customer', JSON.stringify(json.data))
+              // Google users are always customers
               router.push('/')
             } else {
               setGoogleError(json.error || 'Google sign-in failed')
@@ -123,6 +124,16 @@ export default function CustomerLoginPage() {
       const json = await res.json()
       if (json.success) {
         const userData = json.data
+
+        // Admin user → redirect to admin dashboard
+        if (userData.role === 'admin') {
+          localStorage.setItem('lumil_customer', JSON.stringify(userData))
+          router.push('/admin')
+          setLoading(false)
+          return
+        }
+
+        // Customer: check email verification
         if (!userData.emailVerified) {
           setPendingUser(userData)
           setScreen('verify-email')
@@ -215,9 +226,8 @@ export default function CustomerLoginPage() {
           <p className="text-gray-500 text-sm mt-1">
             {screen === 'login'
               ? 'Sign in to your Lumil of Beauty account'
-              : screen === 'verify-email'
-                ? `We sent a code to ${pendingUser?.email || email}`
-                : 'You can verify later from your profile'}
+              : `We sent a code to ${pendingUser?.email || email}`
+            }
           </p>
         </div>
 
@@ -233,7 +243,7 @@ export default function CustomerLoginPage() {
                 onSubmit={handleSubmit}
                 className="space-y-4"
               >
-                {/* Google Sign-In */}
+                {/* Google Sign-In (customers only) */}
                 {googleClientId && (
                   <div className="space-y-3">
                     <Button
