@@ -1,38 +1,50 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Award, Shield, HeartHandshake, Clock, Sparkles, Users, MapPin, Home, Truck } from 'lucide-react'
+import { Award, Shield, HeartHandshake, Sparkles, Users, MapPin } from 'lucide-react'
 
 const features = [
   {
-    icon: <Home className="w-7 h-7" />,
+    icon: <Sparkles className="w-7 h-7" />,
     title: 'Beauty at Your Doorstep',
-    description: 'No need to travel to a salon — our skilled beauty artists come directly to your home in Ilam and Jhapa. Relax in your own space while we transform your look with professional care and expertise.',
+    description: 'No need to travel to a salon — our skilled beauty artists come directly to your home in Ilam and Jhapa. Relax in your own space while we transform your look.',
+    image: 'https://sfile.chatglm.cn/images-ppt/0124ad50d2c9.jpg',
+    imageAlt: 'Premium beauty products for home service',
   },
   {
     icon: <Award className="w-7 h-7" />,
     title: 'Certified Home Artists',
-    description: 'Every artist on our platform is vetted, trained, and certified. They bring their own professional kit and products, ensuring a salon-quality experience delivered right to your living room or venue.',
+    description: 'Every artist is vetted, trained, and certified. They bring their own professional kit ensuring a salon-quality experience delivered right to your living room.',
+    image: 'https://sfile.chatglm.cn/images-ppt/91d7aa2f2f6c.jpg',
+    imageAlt: 'Professional makeup kit and tools',
   },
   {
     icon: <Shield className="w-7 h-7" />,
     title: 'Premium Products',
-    description: 'We use only internationally acclaimed, cruelty-free beauty products from trusted brands. Our artists carry the finest cosmetics and skincare products to ensure safe, beautiful results every time.',
+    description: 'We use internationally acclaimed, cruelty-free beauty products from trusted brands. The finest cosmetics for safe, beautiful results every time.',
+    image: 'https://sfile.chatglm.cn/images-ppt/f4550df2907e.jpg',
+    imageAlt: 'Luxury cosmetics and makeup products',
   },
   {
     icon: <HeartHandshake className="w-7 h-7" />,
     title: 'Personalized Consultation',
-    description: 'Every service starts with a one-on-one consultation at your home. Our artists assess your skin type, preferences, and the occasion to deliver a truly customized beauty experience tailored to you.',
+    description: 'Every service starts with a one-on-one consultation. Our artists assess your skin type, preferences, and occasion to deliver a truly customized experience.',
+    image: 'https://sfile.chatglm.cn/images-ppt/e6525a3c519e.jpg',
+    imageAlt: 'Personalized beauty consultation at home',
   },
   {
     icon: <MapPin className="w-7 h-7" />,
     title: 'Serving Ilam & Jhapa',
-    description: 'We proudly serve communities across Eastern Nepal. Whether you are in Ilam Bazaar, Chandragadhi, Bhadrapur, Damak, or surrounding areas, our artists are ready to come to you.',
+    description: 'Whether you are in Ilam Bazaar, Chandragadhi, Bhadrapur, Damak, or surrounding areas, our artists are ready to come to you.',
+    image: 'https://sfile.chatglm.cn/images-ppt/cff50f735055.jpg',
+    imageAlt: 'Beauty services across Eastern Nepal',
   },
   {
     icon: <Users className="w-7 h-7" />,
     title: '5,000+ Happy Homes',
-    description: 'Join thousands of satisfied customers across Eastern Nepal who trust Lumil of Beauty for weddings, events, and everyday pampering — all without leaving their homes.',
+    description: 'Join thousands of satisfied customers across Eastern Nepal who trust Lumil of Beauty for weddings, events, and everyday pampering.',
+    image: 'https://sfile.chatglm.cn/images-ppt/e41bebea0ee8.jpg',
+    imageAlt: 'Happy beauty service clients',
   },
 ]
 
@@ -57,8 +69,7 @@ export function WhyChooseUs() {
           </h2>
           <p className="text-gray-500 max-w-2xl mx-auto text-lg">
             Why travel to a salon when beauty can come to you? Lumil of Beauty brings
-            professional artistry and premium products to your doorstep across
-            Ilam and Jhapa.
+            professional artistry and premium products to your doorstep.
           </p>
         </motion.div>
 
@@ -72,12 +83,32 @@ export function WhyChooseUs() {
               transition={{ delay: index * 0.1 }}
               className="group relative"
             >
-              <div className="h-full bg-white rounded-2xl p-8 border border-pink-50 hover:border-pink-200 shadow-sm hover:shadow-xl hover:shadow-pink-100/20 transition-all duration-300">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-100 to-rose-100 flex items-center justify-center text-pink-600 mb-6 group-hover:scale-110 transition-transform duration-300">
-                  {feature.icon}
+              <div className="h-full bg-white rounded-2xl overflow-hidden border border-pink-50 hover:border-pink-200 shadow-sm hover:shadow-xl hover:shadow-pink-100/20 transition-all duration-500">
+                {/* Image area with hover zoom */}
+                <div className="relative h-44 overflow-hidden">
+                  <img
+                    src={feature.image}
+                    alt={feature.imageAlt}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-white via-white/20 to-transparent" />
+                  {/* Floating icon badge */}
+                  <motion.div
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    className="absolute bottom-4 left-5 w-12 h-12 rounded-xl bg-white shadow-lg shadow-pink-100/30 flex items-center justify-center text-pink-600"
+                  >
+                    {feature.icon}
+                  </motion.div>
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3">{feature.title}</h3>
-                <p className="text-gray-500 leading-relaxed text-sm">{feature.description}</p>
+
+                {/* Text content */}
+                <div className="p-6 pt-3">
+                  <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-pink-600 transition-colors">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-500 leading-relaxed text-sm">{feature.description}</p>
+                </div>
               </div>
             </motion.div>
           ))}

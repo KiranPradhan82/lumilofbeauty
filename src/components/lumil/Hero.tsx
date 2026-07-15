@@ -2,7 +2,43 @@
 
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import { ArrowDown, Sparkles, Star, MapPin, Home } from 'lucide-react'
+import { ArrowDown, Sparkles, Star, MapPin } from 'lucide-react'
+
+// Beauty product images for floating effect
+const floatingImages = [
+  {
+    src: 'https://sfile.chatglm.cn/images-ppt/497a47774493.jpg',
+    alt: 'Makeup palette',
+    className: 'top-[12%] right-[5%] w-28 h-28 sm:w-40 sm:h-40 lg:w-48 lg:h-48',
+    delay: 0,
+    duration: 6,
+    rotate: 12,
+  },
+  {
+    src: 'https://sfile.chatglm.cn/images-ppt/60a81ddbb9ca.jpg',
+    alt: 'Nail polish collection',
+    className: 'bottom-[15%] left-[3%] w-32 h-24 sm:w-44 sm:h-32 lg:w-56 lg:h-40',
+    delay: 1,
+    duration: 7,
+    rotate: -8,
+  },
+  {
+    src: 'https://sfile.chatglm.cn/images-ppt/f4550df2907e.jpg',
+    alt: 'Makeup kit',
+    className: 'top-[55%] right-[8%] w-20 h-20 sm:w-28 sm:h-28 lg:w-36 lg:h-36',
+    delay: 2,
+    duration: 5.5,
+    rotate: 15,
+  },
+  {
+    src: 'https://sfile.chatglm.cn/images-ppt/302de3c55820.jpg',
+    alt: 'Nail polish bottles',
+    className: 'top-[8%] left-[5%] w-16 h-24 sm:w-20 sm:h-32 lg:w-24 lg:h-40',
+    delay: 0.5,
+    duration: 8,
+    rotate: -6,
+  },
+]
 
 export function Hero() {
   return (
@@ -34,10 +70,43 @@ export function Hero() {
           transition={{ delay: 0.8, duration: 1 }}
           className="absolute bottom-1/4 left-1/4 w-80 h-80 rounded-full bg-white/5 blur-3xl"
         />
+
+        {/* Floating beauty product images */}
+        {floatingImages.map((img, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{
+              opacity: [0.5, 0.8, 0.5],
+              scale: [0.95, 1.05, 0.95],
+              y: [0, -12, 0],
+            }}
+            transition={{
+              duration: img.duration,
+              repeat: Infinity,
+              delay: img.delay,
+              ease: 'easeInOut',
+            }}
+            className={`absolute ${img.className} hidden md:block`}
+          >
+            <div
+              className="w-full h-full rounded-2xl overflow-hidden shadow-2xl shadow-black/20 border-2 border-white/20 backdrop-blur-sm"
+              style={{ transform: `rotate(${img.rotate}deg)` }}
+            >
+              <img
+                src={img.src}
+                alt={img.alt}
+                className="w-full h-full object-cover"
+                loading="eager"
+              />
+            </div>
+          </motion.div>
+        ))}
+
         {/* Floating sparkles */}
         {[...Array(6)].map((_, i) => (
           <motion.div
-            key={i}
+            key={`sparkle-${i}`}
             className="absolute text-white/20"
             style={{
               top: `${20 + i * 12}%`,
