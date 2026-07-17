@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { Sparkles, MapPin, Phone, Mail, Clock, Instagram, Facebook } from 'lucide-react'
+import { useSiteSettings } from '@/lib/useSiteSettings'
 
 const footerLinks = {
   services: [
@@ -22,6 +23,7 @@ const footerLinks = {
 }
 
 export function Footer() {
+  const { logoUrl, companyName, companyPhone, companyEmail, companyAddress } = useSiteSettings()
   const handleNavClick = (href: string) => {
     const el = document.querySelector(href)
     if (el) el.scrollIntoView({ behavior: 'smooth' })
@@ -51,12 +53,16 @@ export function Footer() {
           {/* Brand */}
           <div className="sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-2 mb-5">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
+              {logoUrl ? (
+                <img src={logoUrl} alt={companyName || 'Lumil of Beauty'} className="w-10 h-10 rounded-full object-cover" />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
+              )}
               <div>
-                <div className="font-bold text-white text-lg leading-tight">Lumil</div>
-                <div className="text-[10px] tracking-[0.25em] uppercase text-gray-500">of Beauty</div>
+                <div className="font-bold text-white text-lg leading-tight">{companyName?.split(' ').slice(0, -1).join(' ') || 'Lumil'}</div>
+                <div className="text-[10px] tracking-[0.25em] uppercase text-gray-500">{companyName?.split(' ').slice(-1).join(' ') || 'of Beauty'}</div>
               </div>
             </div>
             <p className="text-sm text-gray-400 leading-relaxed mb-6">
@@ -114,15 +120,15 @@ export function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-pink-500 mt-0.5 shrink-0" />
-                <span className="text-sm text-gray-400">Ilam &amp; Jhapa Districts, Eastern Nepal</span>
+                <span className="text-sm text-gray-400">{companyAddress || 'Ilam &amp; Jhapa Districts, Eastern Nepal'}</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-pink-500 shrink-0" />
-                <span className="text-sm text-gray-400">+977-9801234567</span>
+                <span className="text-sm text-gray-400">{companyPhone || '+977-9801234567'}</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-pink-500 shrink-0" />
-                <span className="text-sm text-gray-400">hello@lumilofbeauty.com</span>
+                <span className="text-sm text-gray-400">{companyEmail || 'hello@lumilofbeauty.com'}</span>
               </li>
               <li className="flex items-start gap-3">
                 <Clock className="w-5 h-5 text-pink-500 mt-0.5 shrink-0" />

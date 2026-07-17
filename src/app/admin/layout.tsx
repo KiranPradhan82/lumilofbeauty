@@ -8,6 +8,7 @@ import {
   LayoutDashboard, Scissors, FolderOpen, CalendarDays, Settings,
   LogOut, Menu, X, Sparkles, ChevronRight, UserCircle, Image
 } from 'lucide-react'
+import { useSiteSettings } from '@/lib/useSiteSettings'
 
 const navItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -25,6 +26,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [adminUser, setAdminUser] = useState<any>(null)
+  const { logoUrl, companyName } = useSiteSettings()
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -74,11 +76,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between px-5 h-16 border-b border-gray-800">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-white" />
-              </div>
+              {logoUrl ? (
+                <img src={logoUrl} alt={companyName || 'Lumil'} className="w-8 h-8 rounded-lg object-cover" />
+              ) : (
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-white" />
+                </div>
+              )}
               <div>
-                <span className="font-bold text-white text-sm">Lumil</span>
+                <span className="font-bold text-white text-sm">{companyName?.split(' ').slice(0, -1).join(' ') || 'Lumil'}</span>
                 <span className="text-[9px] tracking-widest text-gray-500 uppercase block leading-none">Admin</span>
               </div>
             </div>

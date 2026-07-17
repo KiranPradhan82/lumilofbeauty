@@ -8,6 +8,10 @@ export async function GET() {
       where: { key: { in: [
         'googleClientId',
         'companyName',
+        'companyPhone',
+        'companyEmail',
+        'companyAddress',
+        'logoUrl',
         'parlourLat',
         'parlourLng',
         'deliveryRadiusKm',

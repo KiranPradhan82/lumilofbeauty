@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Menu, X, Sparkles, LogIn, UserCircle } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useSiteSettings } from '@/lib/useSiteSettings'
 
 const navLinks = [
   { label: 'Home', href: '#home' },
@@ -20,6 +21,7 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [customer, setCustomer] = useState<any>(null)
+  const { logoUrl, companyName } = useSiteSettings()
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
@@ -65,15 +67,19 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo */}
           <a href="/" onClick={(e) => { e.preventDefault(); router.push('/') }} className="flex items-center gap-2 group">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center shadow-lg shadow-pink-200/50">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
+            {logoUrl ? (
+              <img src={logoUrl} alt={companyName || 'Lumil of Beauty'} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover shadow-lg shadow-pink-200/50" />
+            ) : (
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center shadow-lg shadow-pink-200/50">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+            )}
             <div className="flex flex-col">
               <span className={`text-lg sm:text-xl font-bold tracking-tight leading-tight ${scrolled ? 'text-gray-900' : 'text-white'} group-hover:text-pink-600 transition-colors`}>
-                Lumil
+                {companyName?.split(' ').slice(0, -1).join(' ') || 'Lumil'}
               </span>
               <span className={`text-[10px] sm:text-xs tracking-[0.25em] uppercase leading-tight ${scrolled ? 'text-gray-400' : 'text-white/70'} transition-colors`}>
-                of Beauty
+                {companyName?.split(' ').slice(-1).join(' ') || 'of Beauty'}
               </span>
             </div>
           </a>
@@ -140,10 +146,14 @@ export function Navbar() {
                 <div className="flex flex-col h-full">
                   <div className="flex items-center justify-between p-6 border-b border-pink-50">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center">
-                        <Sparkles className="w-4 h-4 text-white" />
-                      </div>
-                      <span className="font-bold text-gray-900">Lumil</span>
+                      {logoUrl ? (
+                        <img src={logoUrl} alt={companyName || 'Lumil'} className="w-8 h-8 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center">
+                          <Sparkles className="w-4 h-4 text-white" />
+                        </div>
+                      )}
+                      <span className="font-bold text-gray-900">{companyName?.split(' ').slice(0, -1).join(' ') || 'Lumil'}</span>
                     </div>
                   </div>
                   <div className="flex-1 py-4">
