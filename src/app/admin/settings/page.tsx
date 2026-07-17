@@ -240,7 +240,7 @@ export default function AdminSettingsPage() {
               <label className="cursor-pointer">
                 <Input type="file" accept="image/*" className="hidden" onChange={handleLogoSelect} />
                 <Button variant="outline" asChild disabled={uploading}>
-                  <span><Upload className="w-4 h-4 mr-2" />{uploading ? 'Uploading...' : localPreview ? 'Change Logo' : 'Upload Logo'}</span>
+                  <span><Upload className="w-4 h-4 mr-2" />{uploading ? 'Processing...' : form.logoUrl ? 'Change Logo' : 'Upload Logo'}</span>
                 </Button>
               </label>
               {(form.logoUrl || localPreview) && (
