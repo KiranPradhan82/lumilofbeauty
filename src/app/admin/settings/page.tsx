@@ -21,6 +21,7 @@ export default function AdminSettingsPage() {
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [localPreview, setLocalPreview] = useState<string | null>(null)
   const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({})
   const [geocoding, setGeocoding] = useState(false)
   const [geoError, setGeoError] = useState('')
@@ -43,6 +44,7 @@ export default function AdminSettingsPage() {
       const json = await res.json()
       if (json.success) {
         setSaved(true)
+        setLocalPreview(null) // Clear local preview, now using server URL
         setTimeout(() => setSaved(false), 3000)
       } else {
         setError(json.error || 'Failed to save settings')
@@ -95,18 +97,32 @@ export default function AdminSettingsPage() {
     setGeocoding(false)
   }
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    // Show instant local preview
+    const preview = URL.createObjectURL(file)
+    setLocalPreview(preview)
+    // Auto-upload in background
     setUploading(true)
     const fd = new FormData()
     fd.append('file', file)
-    const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
-    if (res.ok) {
-      const data = await res.json()
-      if (data.success) setForm(f => ({ ...f, logoUrl: data.url }))
-    }
-    setUploading(false)
+    fetch('/api/admin/upload', { method: 'POST', body: fd })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setForm(f => ({ ...f, logoUrl: data.url }))
+          // Keep local preview until save, then it will use the server URL
+        } else {
+          setError(data.error || 'Upload failed')
+          setLocalPreview(null)
+        }
+      })
+      .catch(() => {
+        setError('Upload failed. Check your connection.')
+        setLocalPreview(null)
+      })
+      .finally(() => setUploading(false))
   }
 
   const toggleSecret = (key: string) => {
@@ -143,6 +159,11 @@ export default function AdminSettingsPage() {
     )
   }
 
+  // Cleanup object URL on unmount
+  useEffect(() => {
+    return () => { if (localPreview) URL.revokeObjectURL(localPreview) }
+  }, [localPreview])
+
   if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-8 h-8 text-pink-500 animate-spin" /></div>
 
   const addressVal = form.companyAddress || ''
@@ -171,21 +192,62 @@ export default function AdminSettingsPage() {
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2 text-lg"><ImageIcon className="w-5 h-5" />Logo</CardTitle></CardHeader>
         <CardContent>
-          <div className="flex items-center gap-6">
-            {form.logoUrl ? (
-              <img src={form.logoUrl} alt="Logo" className="w-20 h-20 rounded-xl object-cover border border-gray-200" />
-            ) : (
-              <div className="w-20 h-20 rounded-xl bg-gray-100 flex items-center justify-center"><ImageIcon className="w-8 h-8 text-gray-300" /></div>
-            )}
-            <div className="space-y-2">
+          <div className="space-y-4">
+            {/* Preview area */}
+            <div className="relative w-full flex items-center justify-center rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-dashed border-gray-200 overflow-hidden" style={{ minHeight: '180px' }}>
+              {(localPreview || form.logoUrl) ? (
+                <>
+                  <img
+                    src={localPreview || form.logoUrl}
+                    alt="Logo Preview"
+                    className="max-h-48 max-w-full object-contain p-4"
+                  />
+                  {localPreview && !uploading && (
+                    <span className="absolute top-2 left-2 bg-amber-100 text-amber-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                      New — save to apply
+                    </span>
+                  )}
+                  {uploading && (
+                    <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                      <Loader2 className="w-6 h-6 text-pink-500 animate-spin" />
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="flex flex-col items-center gap-2 py-8 text-gray-400">
+                  <div className="w-16 h-16 rounded-2xl bg-gray-200 flex items-center justify-center">
+                    <ImageIcon className="w-8 h-8 text-gray-300" />
+                  </div>
+                  <p className="text-sm">No logo uploaded yet</p>
+                  <p className="text-xs">Upload your brand logo below</p>
+                </div>
+              )}
+            </div>
+            {/* Actions */}
+            <div className="flex items-center gap-3">
               <label className="cursor-pointer">
-                <Input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+                <Input type="file" accept="image/*" className="hidden" onChange={handleLogoSelect} />
                 <Button variant="outline" asChild disabled={uploading}>
-                  <span><Upload className="w-4 h-4 mr-2" />{uploading ? 'Uploading...' : 'Upload Logo'}</span>
+                  <span><Upload className="w-4 h-4 mr-2" />{uploading ? 'Uploading...' : localPreview ? 'Change Logo' : 'Upload Logo'}</span>
                 </Button>
               </label>
-              {form.logoUrl && <Button variant="ghost" size="sm" className="text-red-500" onClick={() => setForm(f => ({ ...f, logoUrl: '' }))}>Remove</Button>}
+              {(form.logoUrl || localPreview) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                  onClick={() => {
+                    setForm(f => ({ ...f, logoUrl: '' }))
+                    setLocalPreview(null)
+                  }}
+                >
+                  Remove
+                </Button>
+              )}
             </div>
+            <p className="text-xs text-gray-400">
+              Supports JPEG, PNG, GIF, WebP, SVG. Max 5 MB. The logo will appear in the navbar, footer, and admin panel across the entire site.
+            </p>
           </div>
         </CardContent>
       </Card>
