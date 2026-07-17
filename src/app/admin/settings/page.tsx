@@ -100,29 +100,46 @@ export default function AdminSettingsPage() {
   const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File too large. Maximum size is 5 MB.')
+      return
+    }
     // Show instant local preview
     const preview = URL.createObjectURL(file)
     setLocalPreview(preview)
-    // Auto-upload in background
+    // Convert to base64 and resize (works offline, no server upload needed)
     setUploading(true)
-    const fd = new FormData()
-    fd.append('file', file)
-    fetch('/api/admin/upload', { method: 'POST', body: fd })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          setForm(f => ({ ...f, logoUrl: data.url }))
-          // Keep local preview until save, then it will use the server URL
-        } else {
-          setError(data.error || 'Upload failed')
-          setLocalPreview(null)
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        const MAX = 400 // max dimension for logo
+        let w = img.width, h = img.height
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round(h * MAX / w); w = MAX }
+          else { w = Math.round(w * MAX / h); h = MAX }
         }
-      })
-      .catch(() => {
-        setError('Upload failed. Check your connection.')
+        canvas.width = w
+        canvas.height = h
+        canvas.getContext('2d')!.drawImage(img, 0, 0, w, h)
+        const dataUrl = canvas.toDataURL('image/png', 0.9)
+        setForm(f => ({ ...f, logoUrl: dataUrl }))
+        setUploading(false)
+      }
+      img.onerror = () => {
+        setError('Could not read the image file.')
         setLocalPreview(null)
-      })
-      .finally(() => setUploading(false))
+        setUploading(false)
+      }
+      img.src = ev.target!.result as string
+    }
+    reader.onerror = () => {
+      setError('Failed to read file. Please try again.')
+      setLocalPreview(null)
+      setUploading(false)
+    }
+    reader.readAsDataURL(file)
   }
 
   const toggleSecret = (key: string) => {
@@ -202,11 +219,6 @@ export default function AdminSettingsPage() {
                     alt="Logo Preview"
                     className="max-h-48 max-w-full object-contain p-4"
                   />
-                  {localPreview && !uploading && (
-                    <span className="absolute top-2 left-2 bg-amber-100 text-amber-700 text-xs font-medium px-2 py-0.5 rounded-full">
-                      New — save to apply
-                    </span>
-                  )}
                   {uploading && (
                     <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
                       <Loader2 className="w-6 h-6 text-pink-500 animate-spin" />
