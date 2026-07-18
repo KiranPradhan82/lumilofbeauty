@@ -3,44 +3,47 @@
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { ArrowDown, Sparkles, Star, MapPin } from 'lucide-react'
-
-// Beauty product images for floating effect
-const floatingImages = [
-  {
-    src: 'https://sfile.chatglm.cn/images-ppt/497a47774493.jpg',
-    alt: 'Makeup palette',
-    className: 'top-[12%] right-[5%] w-28 h-28 sm:w-40 sm:h-40 lg:w-48 lg:h-48',
-    delay: 0,
-    duration: 6,
-    rotate: 12,
-  },
-  {
-    src: 'https://sfile.chatglm.cn/images-ppt/60a81ddbb9ca.jpg',
-    alt: 'Nail polish collection',
-    className: 'bottom-[15%] left-[3%] w-32 h-24 sm:w-44 sm:h-32 lg:w-56 lg:h-40',
-    delay: 1,
-    duration: 7,
-    rotate: -8,
-  },
-  {
-    src: 'https://sfile.chatglm.cn/images-ppt/f4550df2907e.jpg',
-    alt: 'Makeup kit',
-    className: 'top-[55%] right-[8%] w-20 h-20 sm:w-28 sm:h-28 lg:w-36 lg:h-36',
-    delay: 2,
-    duration: 5.5,
-    rotate: 15,
-  },
-  {
-    src: 'https://sfile.chatglm.cn/images-ppt/302de3c55820.jpg',
-    alt: 'Nail polish bottles',
-    className: 'top-[8%] left-[5%] w-16 h-24 sm:w-20 sm:h-32 lg:w-24 lg:h-40',
-    delay: 0.5,
-    duration: 8,
-    rotate: -6,
-  },
-]
+import { useSiteSettings } from '@/lib/useSiteSettings'
 
 export function Hero() {
+  const settings = useSiteSettings()
+
+  // Use admin-uploaded images or fall back to defaults
+  const floatingImages = [
+    {
+      src: settings.heroImage1 || 'https://sfile.chatglm.cn/images-ppt/497a47774493.jpg',
+      alt: 'Makeup palette',
+      className: 'top-[12%] right-[5%] w-28 h-28 sm:w-40 sm:h-40 lg:w-48 lg:h-48',
+      delay: 0,
+      duration: 6,
+      rotate: 12,
+    },
+    {
+      src: settings.heroImage2 || 'https://sfile.chatglm.cn/images-ppt/60a81ddbb9ca.jpg',
+      alt: 'Nail polish collection',
+      className: 'bottom-[15%] left-[3%] w-32 h-24 sm:w-44 sm:h-32 lg:w-56 lg:h-40',
+      delay: 1,
+      duration: 7,
+      rotate: -8,
+    },
+    {
+      src: settings.heroImage3 || 'https://sfile.chatglm.cn/images-ppt/f4550df2907e.jpg',
+      alt: 'Makeup kit',
+      className: 'top-[55%] right-[8%] w-20 h-20 sm:w-28 sm:h-28 lg:w-36 lg:h-36',
+      delay: 2,
+      duration: 5.5,
+      rotate: 15,
+    },
+    {
+      src: settings.heroImage4 || 'https://sfile.chatglm.cn/images-ppt/302de3c55820.jpg',
+      alt: 'Nail polish bottles',
+      className: 'top-[8%] left-[5%] w-16 h-24 sm:w-20 sm:h-32 lg:w-24 lg:h-40',
+      delay: 0.5,
+      duration: 8,
+      rotate: -6,
+    },
+  ]
+
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background gradient */}

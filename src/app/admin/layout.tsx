@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import {
   LayoutDashboard, Scissors, FolderOpen, CalendarDays, Settings,
-  LogOut, Menu, X, Sparkles, ChevronRight, UserCircle, Image
+  LogOut, Menu, X, Sparkles, ChevronRight, UserCircle, Image, ImageIcon
 } from 'lucide-react'
 import { useSiteSettings } from '@/lib/useSiteSettings'
 
@@ -16,6 +16,7 @@ const navItems = [
   { label: 'Categories', href: '/admin/categories', icon: FolderOpen },
   { label: 'Banners', href: '/admin/banners', icon: Image },
   { label: 'Bookings', href: '/admin/bookings', icon: CalendarDays },
+  { label: 'Website Images', href: '/admin/website-images', icon: ImageIcon },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
   { label: 'Profile', href: '/admin/profile', icon: UserCircle },
 ]

@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
       include: {
         user: { select: { id: true, firstName: true, lastName: true, email: true, phone: true, role: true } },
         services: { include: { service: true } },
+        reviews: { include: { service: { select: { name: true } } } },
       },
       orderBy: { createdAt: 'desc' },
     })

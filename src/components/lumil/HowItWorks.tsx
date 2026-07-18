@@ -2,14 +2,22 @@
 
 import { motion } from 'framer-motion'
 import { Search, CalendarCheck, Truck, Heart, ArrowRight } from 'lucide-react'
+import { useSiteSettings } from '@/lib/useSiteSettings'
 
-const steps = [
+const DEFAULT_STEPS = [
+  { image: 'https://sfile.chatglm.cn/images-ppt/107c9e19e949.jpg', imageAlt: 'Browse beauty services and cosmetics' },
+  { image: 'https://sfile.chatglm.cn/images-ppt/d6d6726093f5.jpg', imageAlt: 'Schedule your beauty appointment' },
+  { image: 'https://sfile.chatglm.cn/images-ppt/91d7aa2f2f6c.jpg', imageAlt: 'Beauty artist with professional makeup kit' },
+  { image: 'https://sfile.chatglm.cn/images-ppt/b4dd54b82d73.webp', imageAlt: 'Gorgeous bridal makeup result' },
+]
+
+const HIW_KEYS = ['hiwImage1', 'hiwImage2', 'hiwImage3', 'hiwImage4']
+
+const stepMeta = [
   {
     icon: <Search className="w-7 h-7" />,
     title: 'Browse & Choose',
     description: 'Explore our curated services — bridal makeup, nail art, facials, hair styling, and more. Pick exactly what you need.',
-    image: 'https://sfile.chatglm.cn/images-ppt/107c9e19e949.jpg',
-    imageAlt: 'Browse beauty services and cosmetics',
     color: 'from-pink-500 to-rose-500',
     bgColor: 'bg-pink-50',
   },
@@ -17,8 +25,6 @@ const steps = [
     icon: <CalendarCheck className="w-7 h-7" />,
     title: 'Pick Date & Location',
     description: 'Select a convenient date, time, and pin your location on the map. We will confirm your service area instantly.',
-    image: 'https://sfile.chatglm.cn/images-ppt/d6d6726093f5.jpg',
-    imageAlt: 'Schedule your beauty appointment',
     color: 'from-rose-500 to-fuchsia-500',
     bgColor: 'bg-rose-50',
   },
@@ -26,8 +32,6 @@ const steps = [
     icon: <Truck className="w-7 h-7" />,
     title: 'Artist Arrives Home',
     description: 'Our certified artist arrives at your doorstep with a complete professional kit — brushes, palettes, nail supplies, and more.',
-    image: 'https://sfile.chatglm.cn/images-ppt/91d7aa2f2f6c.jpg',
-    imageAlt: 'Beauty artist with professional makeup kit',
     color: 'from-fuchsia-500 to-purple-500',
     bgColor: 'bg-fuchsia-50',
   },
@@ -35,14 +39,20 @@ const steps = [
     icon: <Heart className="w-7 h-7" />,
     title: 'Look & Feel Amazing',
     description: 'Sit back and relax while we transform your look. Walk out feeling confident, glowing, and absolutely beautiful.',
-    image: 'https://sfile.chatglm.cn/images-ppt/b4dd54b82d73.webp',
-    imageAlt: 'Gorgeous bridal makeup result',
     color: 'from-purple-500 to-pink-500',
     bgColor: 'bg-purple-50',
   },
 ]
 
 export function HowItWorks() {
+  const settings = useSiteSettings()
+
+  const steps = stepMeta.map((meta, i) => ({
+    ...meta,
+    image: (settings as any)[HIW_KEYS[i]] || DEFAULT_STEPS[i].image,
+    imageAlt: DEFAULT_STEPS[i].imageAlt,
+  }))
+
   return (
     <section id="how-it-works" className="py-20 sm:py-28 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

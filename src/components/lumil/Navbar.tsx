@@ -109,6 +109,16 @@ export function Navbar() {
                 <Button
                   variant="ghost"
                   size="icon"
+                  onClick={() => router.push('/account')}
+                  className={`rounded-full ${scrolled ? 'text-gray-500 hover:text-pink-600 hover:bg-pink-50' : 'text-white/70 hover:text-white hover:bg-white/10'}`}
+                  title="My Account"
+                >
+                  <UserCircle className="w-4 h-4 md:mr-0" />
+                  <span className="hidden md:inline ml-1.5 text-sm">Account</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={handleLogout}
                   className={`rounded-full ${scrolled ? 'text-gray-500 hover:text-gray-700' : 'text-white/70 hover:text-white'}`}
                 >
@@ -173,10 +183,10 @@ export function Navbar() {
                     {customer ? (
                       <div className="flex items-center gap-3 px-3 py-2 bg-pink-50 rounded-xl">
                         <UserCircle className="w-5 h-5 text-pink-500" />
-                        <div className="flex-1 min-w-0">
+                        <button onClick={() => { setMobileOpen(false); router.push('/account') }} className="flex-1 min-w-0 text-left">
                           <p className="text-sm font-medium text-gray-900 truncate">{customer.firstName} {customer.lastName}</p>
                           <p className="text-xs text-gray-500 truncate">{customer.email}</p>
-                        </div>
+                        </button>
                         <Button variant="ghost" size="sm" onClick={handleLogout} className="text-gray-400 hover:text-red-500 shrink-0">
                           Logout
                         </Button>

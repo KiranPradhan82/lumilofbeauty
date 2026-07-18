@@ -1,70 +1,127 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Star, Quote, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Star, Quote, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 
-const testimonials = [
+interface DynamicReview {
+  id: string
+  rating: number
+  comment: string
+  user: { firstName: string; lastName: string }
+  service: { name: string }
+  photos: string
+  createdAt: string
+}
+
+// Fallback testimonials when no dynamic reviews exist
+const fallbackTestimonials = [
   {
-    name: 'Priya Sharma',
-    role: 'Bride',
-    rating: 5,
+    name: 'Priya Sharma', role: 'Bride', rating: 5,
     text: 'Lumil of Beauty made my wedding day absolutely magical. The bridal makeup was flawless and lasted the entire day through tears of joy and dancing. My photos look like they belong in a magazine!',
     avatar: 'PS',
     image: 'https://sfile.chatglm.cn/images-ppt/35ef42d1b4a9.jpg',
   },
   {
-    name: 'Sunita Thapa',
-    role: 'Nail Art Lover',
-    rating: 5,
+    name: 'Sunita Thapa', role: 'Nail Art Lover', rating: 5,
     text: 'I have been getting gel manicures here for over a year and the consistency is incredible. Every gel manicure is perfect, every time. The nail art designs are absolutely stunning and unique.',
     avatar: 'ST',
     image: 'https://sfile.chatglm.cn/images-ppt/cd15e385424d.jpg',
   },
   {
-    name: 'Anjana Gurung',
-    role: 'Model',
-    rating: 5,
+    name: 'Anjana Gurung', role: 'Model', rating: 5,
     text: 'As a model, my appearance is my career. The editorial makeup team at Lumil understands high-fashion beauty like no one else in Nepal. They are my go-to for every photoshoot.',
     avatar: 'AG',
     image: 'https://sfile.chatglm.cn/images-ppt/3cd9f08f82de.jpg',
   },
   {
-    name: 'Rita Maharjan',
-    role: 'Bride',
-    rating: 5,
+    name: 'Rita Maharjan', role: 'Bride', rating: 5,
     text: 'The complete bridal package was worth every rupee. From the pre-bridal treatments to the final look, everything was perfectly coordinated. My guests kept asking who did my makeup!',
     avatar: 'RM',
     image: 'https://sfile.chatglm.cn/images-ppt/cff50f735055.jpg',
   },
   {
-    name: 'Dikshya KC',
-    role: 'Skincare Enthusiast',
-    rating: 4,
+    name: 'Dikshya KC', role: 'Skincare Enthusiast', rating: 4,
     text: 'The Signature Facial is hands down the best facial I have ever had. My skin felt transformed after just one session. The estheticians really know their craft and recommend the right treatments.',
     avatar: 'DK',
     image: 'https://sfile.chatglm.cn/images-ppt/0124ad50d2c9.jpg',
   },
   {
-    name: 'Binita Rai',
-    role: 'Nail Art Lover',
-    rating: 5,
+    name: 'Binita Rai', role: 'Nail Art Lover', rating: 5,
     text: 'The nail art designs here are absolutely stunning. I showed them a complex reference and they executed it perfectly. Every time I get compliments on my nails, I send them straight to Lumil!',
     avatar: 'BR',
     image: 'https://sfile.chatglm.cn/images-ppt/7d36496e5190.jpg',
   },
 ]
 
-// Featured testimonials for the large hero-style cards
-const featuredIndices = [0, 2, 4]
+// Default testimonial images for mapping (used when dynamic reviews have no photos)
+const DEFAULT_REVIEW_IMAGES = [
+  'https://sfile.chatglm.cn/images-ppt/35ef42d1b4a9.jpg',
+  'https://sfile.chatglm.cn/images-ppt/cd15e385424d.jpg',
+  'https://sfile.chatglm.cn/images-ppt/3cd9f08f82de.jpg',
+  'https://sfile.chatglm.cn/images-ppt/cff50f735055.jpg',
+  'https://sfile.chatglm.cn/images-ppt/0124ad50d2c9.jpg',
+  'https://sfile.chatglm.cn/images-ppt/7d36496e5190.jpg',
+]
 
 export function Testimonials() {
+  const [dynamicReviews, setDynamicReviews] = useState<DynamicReview[]>([])
   const [activeIndex, setActiveIndex] = useState(0)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/reviews')
+      .then(r => r.json())
+      .then(res => {
+        if (res.success && res.data.length > 0) {
+          setDynamicReviews(res.data)
+        }
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [])
+
+  // Build unified testimonial list
+  const testimonials = dynamicReviews.length > 0
+    ? dynamicReviews.map((r, i) => {
+        let photoUrl = DEFAULT_REVIEW_IMAGES[i % DEFAULT_REVIEW_IMAGES.length]
+        try {
+          const parsed = JSON.parse(r.photos)
+          if (Array.isArray(parsed) && parsed.length > 0) photoUrl = parsed[0]
+        } catch {}
+        return {
+          name: `${r.user.firstName} ${r.user.lastName}`,
+          role: r.service.name,
+          rating: r.rating,
+          text: r.comment || 'Great service!',
+          avatar: `${r.user.firstName[0]}${r.user.lastName[0]}`,
+          image: photoUrl,
+        }
+      })
+    : fallbackTestimonials
+
+  // Ensure activeIndex is valid
+  useEffect(() => {
+    if (testimonials.length > 0 && activeIndex >= testimonials.length) {
+      setActiveIndex(0)
+    }
+  }, [testimonials.length, activeIndex])
 
   const goNext = () => setActiveIndex((i) => (i + 1) % testimonials.length)
   const goPrev = () => setActiveIndex((i) => (i - 1 + testimonials.length) % testimonials.length)
 
   const active = testimonials[activeIndex]
+  const featuredIndices = [0, 2, 4].filter(i => i < testimonials.length)
+
+  if (loading) {
+    return (
+      <section id="reviews" className="py-20 sm:py-28 bg-white flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-pink-500 animate-spin" />
+      </section>
+    )
+  }
+
+  if (testimonials.length === 0) return null
 
   return (
     <section id="reviews" className="py-20 sm:py-28 bg-white">

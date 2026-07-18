@@ -3,80 +3,38 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
+import { useSiteSettings } from '@/lib/useSiteSettings'
 
-interface GalleryImage {
-  src: string
-  alt: string
-  span: string // tailwind grid span class
-  category: string
-}
+// Default images and categories
+const DEFAULT_GALLERY = [
+  { src: 'https://sfile.chatglm.cn/images-ppt/cd15e385424d.jpg', alt: 'Colorful gel nail art design', span: 'row-span-2', category: 'Nail Art' },
+  { src: 'https://sfile.chatglm.cn/images-ppt/35ef42d1b4a9.jpg', alt: 'Bridal makeup transformation', span: '', category: 'Bridal' },
+  { src: 'https://sfile.chatglm.cn/images-ppt/60a81ddbb9ca.jpg', alt: 'Luxury nail polish collection', span: '', category: 'Products' },
+  { src: 'https://sfile.chatglm.cn/images-ppt/7d36496e5190.jpg', alt: 'Creative nail art patterns', span: '', category: 'Nail Art' },
+  { src: 'https://sfile.chatglm.cn/images-ppt/cff50f735055.jpg', alt: 'Professional bridal makeup session', span: 'row-span-2', category: 'Bridal' },
+  { src: 'https://sfile.chatglm.cn/images-ppt/d6d6726093f5.jpg', alt: 'Elegant nail design', span: '', category: 'Nail Art' },
+  { src: 'https://sfile.chatglm.cn/images-ppt/0f78ad409440.jpg', alt: 'Professional makeup brush kit', span: '', category: 'Products' },
+  { src: 'https://sfile.chatglm.cn/images-ppt/11a7ecc0bd59.jpg', alt: 'Floral nail art design', span: '', category: 'Nail Art' },
+  { src: 'https://sfile.chatglm.cn/images-ppt/dccdc27dabfe.jpg', alt: 'Bridal makeup artist at work', span: '', category: 'Bridal' },
+  { src: 'https://sfile.chatglm.cn/images-ppt/497a47774493.jpg', alt: 'Makeup palette with cosmetics', span: '', category: 'Products' },
+]
 
-const galleryImages: GalleryImage[] = [
-  {
-    src: 'https://sfile.chatglm.cn/images-ppt/cd15e385424d.jpg',
-    alt: 'Colorful gel nail art design',
-    span: 'row-span-2',
-    category: 'Nail Art',
-  },
-  {
-    src: 'https://sfile.chatglm.cn/images-ppt/35ef42d1b4a9.jpg',
-    alt: 'Bridal makeup transformation',
-    span: '',
-    category: 'Bridal',
-  },
-  {
-    src: 'https://sfile.chatglm.cn/images-ppt/60a81ddbb9ca.jpg',
-    alt: 'Luxury nail polish collection',
-    span: '',
-    category: 'Products',
-  },
-  {
-    src: 'https://sfile.chatglm.cn/images-ppt/7d36496e5190.jpg',
-    alt: 'Creative nail art patterns',
-    span: '',
-    category: 'Nail Art',
-  },
-  {
-    src: 'https://sfile.chatglm.cn/images-ppt/cff50f735055.jpg',
-    alt: 'Professional bridal makeup session',
-    span: 'row-span-2',
-    category: 'Bridal',
-  },
-  {
-    src: 'https://sfile.chatglm.cn/images-ppt/d6d6726093f5.jpg',
-    alt: 'Elegant nail design',
-    span: '',
-    category: 'Nail Art',
-  },
-  {
-    src: 'https://sfile.chatglm.cn/images-ppt/0f78ad409440.jpg',
-    alt: 'Professional makeup brush kit',
-    span: '',
-    category: 'Products',
-  },
-  {
-    src: 'https://sfile.chatglm.cn/images-ppt/11a7ecc0bd59.jpg',
-    alt: 'Floral nail art design',
-    span: '',
-    category: 'Nail Art',
-  },
-  {
-    src: 'https://sfile.chatglm.cn/images-ppt/dccdc27dabfe.jpg',
-    alt: 'Bridal makeup artist at work',
-    span: '',
-    category: 'Bridal',
-  },
-  {
-    src: 'https://sfile.chatglm.cn/images-ppt/497a47774493.jpg',
-    alt: 'Makeup palette with cosmetics',
-    span: '',
-    category: 'Products',
-  },
+const GALLERY_KEYS = [
+  'galleryImage1', 'galleryImage2', 'galleryImage3', 'galleryImage4',
+  'galleryImage5', 'galleryImage6', 'galleryImage7', 'galleryImage8',
+  'galleryImage9', 'galleryImage10',
 ]
 
 export function BeautyGallery() {
+  const settings = useSiteSettings()
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const [filter, setFilter] = useState('all')
+
+  // Build gallery from settings or defaults
+  const galleryImages = DEFAULT_GALLERY.map((item, i) => ({
+    ...item,
+    src: (settings as any)[GALLERY_KEYS[i]] || item.src,
+  }))
 
   const categories = ['all', 'Nail Art', 'Bridal', 'Products']
   const filtered = filter === 'all' ? galleryImages : galleryImages.filter(img => img.category === filter)

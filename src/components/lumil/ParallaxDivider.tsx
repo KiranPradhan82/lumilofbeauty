@@ -2,6 +2,7 @@
 
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef } from 'react'
+import { useSiteSettings } from '@/lib/useSiteSettings'
 
 interface ParallaxDividerProps {
   image: string
@@ -75,11 +76,12 @@ export function ParallaxDivider({
   )
 }
 
-// Pre-configured divider compositions
+// Pre-configured divider compositions — now dynamic via settings
 export function DividerNailArt() {
+  const settings = useSiteSettings()
   return (
     <ParallaxDivider
-      image="https://sfile.chatglm.cn/images-ppt/5b6c770a5f79.jpg"
+      image={settings.parallaxNailArt || 'https://sfile.chatglm.cn/images-ppt/5b6c770a5f79.jpg'}
       alt="Stunning nail art designs"
       overlayText="Nail Art That Tells Your Story"
       overlaySubtext="From elegant French tips to bold artistic designs, our nail artists create masterpieces on every fingertip."
@@ -89,9 +91,10 @@ export function DividerNailArt() {
 }
 
 export function DividerBridal() {
+  const settings = useSiteSettings()
   return (
     <ParallaxDivider
-      image="https://sfile.chatglm.cn/images-ppt/3cd9f08f82de.jpg"
+      image={settings.parallaxBridal || 'https://sfile.chatglm.cn/images-ppt/3cd9f08f82de.jpg'}
       alt="Bridal makeup session"
       overlayText="Your Dream Bridal Look, Delivered Home"
       overlaySubtext="Our bridal specialists arrive with complete kits to create the perfect look for your most special day."

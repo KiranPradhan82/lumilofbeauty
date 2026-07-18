@@ -2,53 +2,61 @@
 
 import { motion } from 'framer-motion'
 import { Award, Shield, HeartHandshake, Sparkles, Users, MapPin } from 'lucide-react'
+import { useSiteSettings } from '@/lib/useSiteSettings'
 
-const features = [
+const DEFAULT_WCU = [
+  { image: 'https://sfile.chatglm.cn/images-ppt/0124ad50d2c9.jpg', imageAlt: 'Premium beauty products for home service' },
+  { image: 'https://sfile.chatglm.cn/images-ppt/91d7aa2f2f6c.jpg', imageAlt: 'Professional makeup kit and tools' },
+  { image: 'https://sfile.chatglm.cn/images-ppt/f4550df2907e.jpg', imageAlt: 'Luxury cosmetics and makeup products' },
+  { image: 'https://sfile.chatglm.cn/images-ppt/e6525a3c519e.jpg', imageAlt: 'Personalized beauty consultation at home' },
+  { image: 'https://sfile.chatglm.cn/images-ppt/cff50f735055.jpg', imageAlt: 'Beauty services across Eastern Nepal' },
+  { image: 'https://sfile.chatglm.cn/images-ppt/e41bebea0ee8.jpg', imageAlt: 'Happy beauty service clients' },
+]
+
+const WCU_KEYS = ['wcuImage1', 'wcuImage2', 'wcuImage3', 'wcuImage4', 'wcuImage5', 'wcuImage6']
+
+const featureMeta = [
   {
     icon: <Sparkles className="w-7 h-7" />,
     title: 'Beauty at Your Doorstep',
     description: 'No need to travel to a salon — our skilled beauty artists come directly to your home in Ilam and Jhapa. Relax in your own space while we transform your look.',
-    image: 'https://sfile.chatglm.cn/images-ppt/0124ad50d2c9.jpg',
-    imageAlt: 'Premium beauty products for home service',
   },
   {
     icon: <Award className="w-7 h-7" />,
     title: 'Certified Home Artists',
     description: 'Every artist is vetted, trained, and certified. They bring their own professional kit ensuring a salon-quality experience delivered right to your living room.',
-    image: 'https://sfile.chatglm.cn/images-ppt/91d7aa2f2f6c.jpg',
-    imageAlt: 'Professional makeup kit and tools',
   },
   {
     icon: <Shield className="w-7 h-7" />,
     title: 'Premium Products',
     description: 'We use internationally acclaimed, cruelty-free beauty products from trusted brands. The finest cosmetics for safe, beautiful results every time.',
-    image: 'https://sfile.chatglm.cn/images-ppt/f4550df2907e.jpg',
-    imageAlt: 'Luxury cosmetics and makeup products',
   },
   {
     icon: <HeartHandshake className="w-7 h-7" />,
     title: 'Personalized Consultation',
     description: 'Every service starts with a one-on-one consultation. Our artists assess your skin type, preferences, and occasion to deliver a truly customized experience.',
-    image: 'https://sfile.chatglm.cn/images-ppt/e6525a3c519e.jpg',
-    imageAlt: 'Personalized beauty consultation at home',
   },
   {
     icon: <MapPin className="w-7 h-7" />,
     title: 'Serving Ilam & Jhapa',
     description: 'Whether you are in Ilam Bazaar, Chandragadhi, Bhadrapur, Damak, or surrounding areas, our artists are ready to come to you.',
-    image: 'https://sfile.chatglm.cn/images-ppt/cff50f735055.jpg',
-    imageAlt: 'Beauty services across Eastern Nepal',
   },
   {
     icon: <Users className="w-7 h-7" />,
     title: '5,000+ Happy Homes',
     description: 'Join thousands of satisfied customers across Eastern Nepal who trust Lumil of Beauty for weddings, events, and everyday pampering.',
-    image: 'https://sfile.chatglm.cn/images-ppt/e41bebea0ee8.jpg',
-    imageAlt: 'Happy beauty service clients',
   },
 ]
 
 export function WhyChooseUs() {
+  const settings = useSiteSettings()
+
+  const features = featureMeta.map((meta, i) => ({
+    ...meta,
+    image: (settings as any)[WCU_KEYS[i]] || DEFAULT_WCU[i].image,
+    imageAlt: DEFAULT_WCU[i].imageAlt,
+  }))
+
   return (
     <section id="why-us" className="py-20 sm:py-28 bg-gradient-to-b from-pink-50/30 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
