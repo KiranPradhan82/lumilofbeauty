@@ -102,37 +102,39 @@ export function Navbar() {
           {/* Right side buttons */}
           <div className="flex items-center gap-2">
             {customer ? (
-              <div className="hidden md:flex items-center gap-2">
-                <span className={`text-sm ${scrolled ? 'text-gray-600' : 'text-white/80'}`}>
+              <div className="flex items-center gap-2">
+                <span className={`hidden md:inline text-sm ${scrolled ? 'text-gray-600' : 'text-white/80'}`}>
                   Hi, {customer.firstName}
                 </span>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon"
                   onClick={handleLogout}
-                  className={`rounded-full text-sm ${scrolled ? 'text-gray-500 hover:text-gray-700' : 'text-white/70 hover:text-white'}`}
+                  className={`rounded-full ${scrolled ? 'text-gray-500 hover:text-gray-700' : 'text-white/70 hover:text-white'}`}
                 >
-                  Logout
+                  <LogIn className="w-4 h-4 md:mr-0" />
+                  <span className="hidden md:inline ml-1.5 text-sm">Logout</span>
                 </Button>
               </div>
             ) : (
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
                 onClick={() => router.push('/login')}
-                className={`hidden md:flex rounded-full text-sm ${
+                className={`rounded-full ${
                   scrolled ? 'text-gray-600 hover:text-pink-600 hover:bg-pink-50' : 'text-white/90 hover:text-white hover:bg-white/10'
                 }`}
               >
-                <LogIn className="w-4 h-4 mr-1.5" />
-                Login
+                <LogIn className="w-4 h-4" />
+                <span className="hidden md:inline ml-1.5 text-sm">Login</span>
               </Button>
             )}
             <Button
               onClick={() => handleNavClick('#services')}
-              className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-lg shadow-pink-200/50 rounded-full px-5 sm:px-6 h-9 sm:h-10 text-sm"
+              className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-lg shadow-pink-200/50 rounded-full px-4 sm:px-6 h-9 sm:h-10 text-sm"
             >
-              Book Now
+              <span className="hidden sm:inline">Book Now</span>
+              <span className="sm:hidden">Book</span>
             </Button>
 
             {/* Mobile menu */}
